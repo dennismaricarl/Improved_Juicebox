@@ -21,13 +21,6 @@ async function createUser({
 }) {
   const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
   try {
-    //sends a SQL query to the database using the POSTgresSQL client. 
-    //{rows : [user]} is the destructured result. We expect a single user object to be returned.
-    //the text in BROWN is the query statement
-    //The `INSERT INTO' query inserts a new user record into the users table
-    //RETURNING * is used to return the inserted user's data as a result.
-    //the values inside [] specifies the values to be inserted into the SQL query
-    // VALUES($1, $2, $3, $4)  are the placeholders for those values 
     const { rows: [ user ] } = await client.query(`
       INSERT INTO users(username, password, name, location) 
       VALUES($1, $2, $3, $4) 

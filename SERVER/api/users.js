@@ -10,6 +10,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const SALT_COUNT = 10;
 
+
+
+// <---------------------GET, REGISTER, LOGIN USER------------------------------->
+
 //Get users
 usersRouter.get('/', async (req, res, next) => {
     try{
