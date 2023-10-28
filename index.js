@@ -1,4 +1,4 @@
-const app = require('./app');
+const app = require('./SERVER/app');
 const ViteExpress = require("vite-express")
 
 ViteExpress.listen(app, 3000, () => 

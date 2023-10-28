@@ -11,6 +11,6 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
-app.use(express.static(path.join(_dirname, '../../dist')))
+// app.use(express.static(path.join(_dirname, '../../dist')))
 
 module.exports = app; 
