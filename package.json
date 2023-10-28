@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "prisma": "^5.5.2"
+    "prisma": "^5.5.2",
+    "@vitejs/plugin-react": "^4.1.0"
   },
   "dependencies": {
     "@prisma/client": "^5.5.2",
