@@ -1,5 +1,5 @@
 const express = require('express');
-const usersRouter = express.Router();
+const router = express.Router();
 
 const { PrismaClient } = require('.prisma/client');
 const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ const SALT_COUNT = 10;
 // <---------------------GET, REGISTER, LOGIN USER------------------------------->
 
 //Get users
-usersRouter.get('/', async (req, res, next) => {
+router.get('/', async (req, res, next) => {
     try{
         const users = await prisma.users.findMany();
         res.send(users)
@@ -25,7 +25,7 @@ usersRouter.get('/', async (req, res, next) => {
 })
 
 //Register new user
-usersRouter.post('/register', async (req, res, next) => {
+router.post('/register', async (req, res, next) => {
     try{
         const { username, password, name, location } = req.body;
         const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
@@ -53,7 +53,7 @@ usersRouter.post('/register', async (req, res, next) => {
 })
 
 //Log in existing user 
-usersRouter.post('/login', async (req, res, next) => {
+router.post('/login', async (req, res, next) => {
     try {
         const {username, password} = req.body
 
@@ -87,4 +87,4 @@ usersRouter.post('/login', async (req, res, next) => {
 })
 
 
-module.exports = usersRouter;
+module.exports = router;

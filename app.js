@@ -13,4 +13,7 @@ app.use(express.urlencoded({extended:true}));
 
 // app.use(express.static(path.join(_dirname, '../../dist')))
 
+//Backend routes
+
+
 module.exports = app; 

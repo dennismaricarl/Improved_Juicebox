@@ -1,25 +1,43 @@
+const {PrismaClient, Prisma} = require('./prisma/client')
+const prisma = new PrismaClient();
+
 const express = require('express');
+const { getPostsByTagName } = require('../db');
 const tagsRouter = express.Router();
 
-const { 
-  getAllTags,
-  getPostsByTagName
-} = require('../db');
+// <----------------- getAll, getPostsByTagName ------------------> 
 
+
+//Get all tags
 tagsRouter.get('/', async (req, res, next) => {
-  try {
-    const tags = await getAllTags();
-  
-    res.send({
-      tags
-    });
-  } catch ({ name, message }) {
-    next({ name, message });
+  try{
+    const tags = await prisma.tags.findMany()
+    res.send(tags);
+  }catch(error){
+    next(error)
   }
 });
 
+
+//Get post by tag name 
+
+tagsRouter.get('/:tagName/posts', async (req, res, next) => {
+  try{  
+    const postByTag = await prisma.findUnique({
+      where:{
+        post: {connect: {tags}}  //?????
+      }
+    })
+
+
+  }catch(error){
+    next(error)
+  }
+})
+
 tagsRouter.get('/:tagName/posts', async (req, res, next) => {
   let { tagName } = req.params;
+
   
   // decode %23happy to #happy
   tagName = decodeURIComponent(tagName)

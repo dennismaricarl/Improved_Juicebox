@@ -33,7 +33,7 @@ model Post {
   title String
   content String
   active Boolean @default(true)
-   tags Tag[]
+  tags Tag[]
 }
 
 //Tag model
