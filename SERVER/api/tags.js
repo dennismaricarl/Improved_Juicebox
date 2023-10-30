@@ -11,8 +11,8 @@ const tagsRouter = express.Router();
 //Get all tags
 tagsRouter.get('/', async (req, res, next) => {
   try{
-    const tags = await prisma.tags.findMany()
-    res.send(tags);
+    const tag = await prisma.tag.findMany()
+    res.send(tag);
   }catch(error){
     next(error)
   }
@@ -23,9 +23,9 @@ tagsRouter.get('/', async (req, res, next) => {
 
 tagsRouter.get('/:tagName/posts', async (req, res, next) => {
   try{  
-    const postByTag = await prisma.findUnique({
+    const postByTag = await prisma.postByTag.findUnique({
       where:{
-        post: {connect: {tags}}  //?????
+        post: {connect: {tag}}  //?????
       }
     })
 

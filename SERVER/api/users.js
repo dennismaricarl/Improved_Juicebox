@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { PrismaClient } = require('.prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const JWT = process.env.JWT; 
@@ -17,8 +17,8 @@ const SALT_COUNT = 10;
 //Get users
 router.get('/', async (req, res, next) => {
     try{
-        const users = await prisma.users.findMany();
-        res.send(users)
+        const user = await prisma.user.findMany();
+        res.send(user)
     }catch(error){
         next(error)
     }
@@ -66,20 +66,20 @@ router.post('/login', async (req, res, next) => {
     //if user doesn't exist 
         if(!user){
             res.status(401).send({message: 'User not found!'})
+            return;
         }
 
         //verify password 
         const isPasswordValid = await bcrypt.compare(password, user.password)
 
-        if(!password) {
+        if(!isPasswordValidpassword) {
             res.status(401).send({message: 'Invalid password'})
+            return;
         }
     //generate a token for logged in user 
-        const token = jwt.sign({
-            user:user.id},
-            JWT) 
+        const token = jwt.sign({id:user.id}, JWT) 
 
-        res.status(201).send({student, token})
+        res.status(201).send({user, token})
 
     }catch(error) {
         next(error)
