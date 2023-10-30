@@ -13,28 +13,29 @@ const client = new Client({
  * USER Methods
  */
 
-async function createUser({ 
-  username, 
-  password,
-  name,
-  location
-}) {
+
+//Create user 
+async function createUser({username, password, name, location}) {
   const hashedPassword = await bcrypt.hash(password, SALT_COUNT)
-  try {
-    const { rows: [ user ] } = await client.query(`
-      INSERT INTO users(username, password, name, location) 
-      VALUES($1, $2, $3, $4) 
-      ON CONFLICT (username) DO NOTHING 
-      RETURNING *;
-    `, [username, hashedPassword, name, location]);
+  try{
+    const user = await prisma.user.create({
+      data: {
+        username,
+        password:hashedPassword,
+        name,
+        location
+      }
+    })
+    res.send(user)
+    return user 
 
-    return user;
-  } catch (error) {
-    throw error;
+  }catch(error){
+    throw(error)
   }
-};
+}
 
 
+//Update user 
 async function updateUser(id, fields = {}) {
   // build the set string
   const setString = Object.keys(fields).map(
@@ -46,93 +47,89 @@ async function updateUser(id, fields = {}) {
     return;
   }
 
-  try {
-    const { rows: [ user ] } = await client.query(`
-      UPDATE users
-      SET ${ setString }
-      WHERE id=${ id }
-      RETURNING *;
-    `, Object.values(fields));
+  try{
+    const user = await prisma.user.update({
+      where: { id },
+      data: fields  //??? 
+    })
 
-    return user;
-  } catch (error) {
-    throw error;
-  };
-};
+    return user 
 
-async function getAllUsers() {
-  
-  try {
-    const { rows } = await client.query(`
-      SELECT id, username, name, location, active 
-      FROM users;
-    `);
-  
-    return rows;
-  } catch (error) {
-    throw error;
-  }
-};
-
-async function getUserById(userId) {
-  try {
-    const { rows: [ user ] } = await client.query(`
-      SELECT id, username, name, location, active
-      FROM users
-      WHERE id=${ userId }
-    `);
-
-    if (!user) {
-      throw {
-        name: "UserNotFoundError",
-        message: "A user with that id does not exist"
-      }
-    };
-
-    user.posts = await getPostsByUser(userId);
-
-    return user;
-  } catch (error) {
-    throw error;
+  }catch(error){
+    throw(error)
   }
 }
 
-async function getUserByUsername(username) {
-  try {
-    const { rows: [ user ] } = await client.query(`
-      SELECT *
-      FROM users
-      WHERE username=$1
-    `, [ username ]);
 
-    if (!user) {
-      throw {
-        name: "UserNotFoundError",
-        message: "A user with that username does not exist"
+//Get all users 
+async function getAllUsers() {
+  try{
+    const users = prisma.users.findMany({
+      //"select" - to specify which fields to include in database. 
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        location: true,
+        active: true
       }
-    };
+    })
+    return users 
 
-    return user;
-  } catch (error) {
-    throw error;
+  }catch(error){
+    throw(error);
   }
-};
+}
 
-async function getNullByUsername(username) {
-  try {
-    const { rows : [user] } = await client.query(`
-      SELECT * 
-      FROM users 
-      WHERE username=$1
-      `, [ username ]);
+//Get user by id 
 
-      if(!user) {
-        return null;
+async function getUserById(id) {
+  try{
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        location: true,
+        active: true
       }
-      return user;
+    })
 
-  } catch(error){
-    throw error; 
+    user.posts = await getPostsByUser(id);
+
+    return user 
+
+  }catch(error){
+    throw(error)
+  }
+}
+
+
+//Get user by username 
+
+async function getUserByUsername(username) {
+  const user = await prisma.user.findMany({
+    where: {username: user.username}, 
+    select: {username:true}
+  });
+  return user 
+}
+
+//Get Null by username?? what is this? 
+async function getNullByUsername(username){
+  try{
+    const user = await prisma.user.findUnique({
+      where: {username},
+    })
+
+    if(!user) {
+      return null;
+    }
+    return user 
+
+  }catch(error){
+    throw(error)
   }
 };
 
@@ -140,26 +137,60 @@ async function getNullByUsername(username) {
  * POST Methods
  */
 
-async function createPost({
-  authorId,
-  title,
-  content,
-  tags = []
-}) {
-  try {
-    const { rows: [ post ] } = await client.query(`
-      INSERT INTO posts("authorId", title, content) 
-      VALUES($1, $2, $3)
-      RETURNING *;
-    `, [authorId, title, content]);
+//Create Post 
+async function createPost() {
+  try{
+    const post = await prisma.post.create({
+      data: {
+        authorId,
+        title,
+        content,
+        tags
+      }
+    });
 
-    const tagList = await createTags(tags);
+    //connect tag and post  // ???? 
+    const tagList = await createTags(tags);   
 
-    return await addTagsToPost(post.id, tagList);
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        tags: {
+          connect: tagList.map((tag) => ({ id: tag.id })),
+        },
+      },
+    });
+
+    return post;
   } catch (error) {
     throw error;
   }
-};
+}
+
+//Update Post 
+async function updatePost(postId, fields = {}){
+  //  // read off the tags & remove that field 
+  //  const tags  = fields; // might be undefined
+  //  delete fields.tags;
+ 
+   // build the set string
+   const setString = Object.keys(fields).map(
+     (key, index) => `"${ key }"=$${ index + 1 }`
+   ).join(', ');
+
+  try{
+      if (setString.length > 0) {
+        await prisma.post.update({
+          where: {postId},
+          data: {fields}
+        })
+      } 
+  } catch(error){
+    throw(error)
+    }
+}
+
+//update post
 
 async function updatePost(postId, fields = {}) {
   // read off the tags & remove that field 
@@ -174,12 +205,11 @@ async function updatePost(postId, fields = {}) {
   try {
     // update any fields that need to be updated
     if (setString.length > 0) {
-      await client.query(`
-        UPDATE posts
-        SET ${ setString }
-        WHERE id=${ postId }
-        RETURNING *;
-      `, Object.values(fields));
+      const post = await prisma.post.update({
+        where: {postId},
+        data: {fields}
+      })
+      return post 
     }
 
     // return early if there's no tags to update
@@ -210,23 +240,39 @@ async function updatePost(postId, fields = {}) {
   }
 }
 
+//Get all posts
+
 async function getAllPosts() {
-  try {
-    const { rows: postIds } = await client.query(`
-      SELECT id
-      FROM posts;
-    `);
-
-    const posts = await Promise.all(postIds.map(
-      post => getPostById( post.id )
-    ));
-
-    return posts;
-  } catch (error) {
-    throw error;
-  }
+try{
+  const posts = await prisma.posts.findMany({
+    where: {
+      id: postId 
+    }
+   })
+   return posts
+} catch(error){
+  throw(error)
+}
 };
 
+// async function getAllPosts() {
+//   try {
+//     const { rows: postIds } = await client.query(`
+//       SELECT id
+//       FROM posts;
+//     `);
+
+//     const posts = await Promise.all(postIds.map(
+//       post => getPostById( post.id )
+//     ));
+
+//     return posts;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+//Get post by Id 
 async function getPostById(postId) {
   try {
     const { rows: [ post ]  } = await client.query(`
