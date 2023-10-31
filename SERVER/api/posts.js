@@ -11,8 +11,8 @@ const prisma = new PrismaClient();
 //GET request
 postsRouter.get('/', async (req, res, next) => {
     try{
-      const posts = await prisma.posts.findMany()
-      res.send(posts)
+      const post = await prisma.post.findMany()
+      res.send(post)
     }catch(error){
       next(error)
     }

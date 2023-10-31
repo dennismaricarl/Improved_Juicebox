@@ -12,7 +12,7 @@ datasource db {
 
 //User model
 
-model User {
+model user {
   id Int @id @default(autoincrement())
   username String @unique
   password String
@@ -28,7 +28,7 @@ model User {
 
 model Post {
   id Int @id @default(autoincrement())
-  author User @relation(fields: [authorId], references: [id])
+  author user @relation(fields: [authorId], references: [id])
   authorId Int
   title String
   content String

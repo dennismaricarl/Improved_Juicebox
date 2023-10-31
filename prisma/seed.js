@@ -71,7 +71,6 @@ async function seedDatabase() {
  
     }catch(error){
         console.error("Error during rebuildDB")
-        |
         throw error;
     }
     await prisma.$disconnect();
