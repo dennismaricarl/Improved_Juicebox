@@ -1,7 +1,7 @@
 const app = require('./app');
 
-const ViteExpress = require("vite-express")
+const { listen } = require("vite-express");
 
-ViteExpress.listen(app, 3000, () => 
+listen(app, 3000, () => 
 console.log("Server is listening on port 3000..."))
 

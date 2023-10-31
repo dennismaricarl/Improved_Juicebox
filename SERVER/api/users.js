@@ -44,7 +44,7 @@ router.post('/register', async (req, res, next) => {
         //generate a token for new user 
         const token = jwt.sign({id: user.id}, JWT)
         
-        res.status(201).send({user, message:'thanks for signing up', token})
+        res.status(201).send({username, message:'thanks for signing up', token})
 
 
     }catch(error){
@@ -54,16 +54,13 @@ router.post('/register', async (req, res, next) => {
 
 //Log in existing user 
 router.post('/login', async (req, res, next) => {
+    const { username, password } = req.body;
     try {
-        const {username, password} = req.body
-
         const user = await prisma.user.findUnique({
-            where: {
-                username,
-            }
+            where: { username }
         })
         
-    //if user doesn't exist 
+    //if user doesn't exist, send an error response 
         if(!user){
             res.status(401).send({message: 'User not found!'})
             return;
@@ -72,12 +69,12 @@ router.post('/login', async (req, res, next) => {
         //verify password 
         const isPasswordValid = await bcrypt.compare(password, user.password)
 
-        if(!isPasswordValidpassword) {
+        if(!isPasswordValid) {
             res.status(401).send({message: 'Invalid password'})
             return;
         }
-    //generate a token for logged in user 
-        const token = jwt.sign({id:user.id}, JWT) 
+    //generate a JWT token for logged in user 
+        const token = jwt.sign({id:user.id}, JWT, {expiresIn: '1h' }) 
 
         res.status(201).send({user, token})
 

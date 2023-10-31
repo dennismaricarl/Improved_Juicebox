@@ -1,7 +1,7 @@
 const express = require('express');
 const postsRouter = express.Router();
 
-const { PrismaClient } = require('./prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 
@@ -21,7 +21,8 @@ postsRouter.get('/', async (req, res, next) => {
 
 //Create a new post 
 postsRouter.post('/', async (req, res, next) => {
-  try{  
+  try{ 
+    const {title, content, tags} = req.body
     const post = await prisma.post.create({
       data: {
           authorId: req.user.id,
@@ -62,7 +63,7 @@ postsRouter.patch('/:postId', async (req, res, next) => {
 
 
 //Delete a post 
-postsRouter('/:postId', async (req, res, next) => {
+postsRouter.delete('/:postId', async (req, res, next) => {
   try{
     const post = await prisma.post.delete({
       where: {
