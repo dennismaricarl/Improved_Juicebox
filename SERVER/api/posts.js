@@ -19,16 +19,30 @@ postsRouter.get('/', async (req, res, next) => {
 })
 
 
+//GET by id 
+postsRouter.get('/:id',async (req, res, next) => {
+  try{
+    const post = await prisma.post.findUniqueOrThrow({
+      where: {
+        id: Number(req.params.id)
+      }
+    })
+    res.send(post)
+  }catch(error){
+    next(error)
+  }
+})
+
+
 //Create a new post 
 postsRouter.post('/', async (req, res, next) => {
   try{ 
-    const {title, content, tags} = req.body
+    const {title, content, authorId} = req.body
     const post = await prisma.post.create({
       data: {
-          authorId: req.user.id,
+          authorId,
           title,
           content,
-          tags
       }
     })
     if(post) {
@@ -47,11 +61,16 @@ postsRouter.post('/', async (req, res, next) => {
 //Update a post
 //PATCH request 
 
-postsRouter.patch('/:postId', async (req, res, next) => {
+postsRouter.patch('/:id', async (req, res, next) => {
+  const { title, content } = req.body;
   try{
     const post = await prisma.post.update({
       where: {
-        authorId: req.params.id
+        id: Number(req.params.id),
+        data: {
+          title,
+          content
+        }
       }
     })
     res.send(post)
@@ -63,11 +82,11 @@ postsRouter.patch('/:postId', async (req, res, next) => {
 
 
 //Delete a post 
-postsRouter.delete('/:postId', async (req, res, next) => {
+postsRouter.delete('/:id', async (req, res, next) => {
   try{
     const post = await prisma.post.delete({
       where: {
-        authorId: req.params.id 
+        id: Number(req.params.id) 
       }
     })
     res.send(post)
