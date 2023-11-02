@@ -38,7 +38,7 @@ postsRouter.get('/:id',async (req, res, next) => {
 
 
 //Create a new post 
-postsRouter.post('/', async (req, res, next) => {
+postsRouter.post('/',requireUser,  async (req, res, next) => {
   try{ 
     const {title, content} = req.body
     const post = await prisma.post.create({
@@ -103,7 +103,7 @@ postsRouter.put('/:id', requireUser, async (req, res, next) => {
 
 
 //Delete a post 
-postsRouter.delete('/:id', async (req, res, next) => {
+postsRouter.delete('/:id', requireUser, async (req, res, next) => {
   try{
     const post = await prisma.post.delete({
       where: {
