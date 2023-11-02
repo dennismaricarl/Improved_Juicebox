@@ -49,3 +49,29 @@ describe('POST /api/users/login', () => {
     })
 });
 
+
+describe('POST /api/users/posts', () => {
+    it('creates a new post', async () => {
+        const NewPost = {
+            id: 1,
+            authorId: 2,
+            title: "Hello",
+            content: "My Content",
+            active: true
+        };
+
+        prismaMock.post.create.mockResolvedValue(post);
+
+        const response = await request(app).post('/api/users/post');
+
+        const {post} = response.body;
+        
+        expect(post.id).toEqual(NewPost.id);
+        expect(post.authorId).toEqual(NewPost.authorId);
+        expect(post.title).toEqual(NewPost.title);
+        expect(post.content).toEqual(NewPost.content);
+        expect(post.active).toEqual(true);
+
+        expect(prismaMock.post.create).toHaveBeenCalledTimes(1);
+    });
+})
