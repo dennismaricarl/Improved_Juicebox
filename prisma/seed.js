@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function createInitialUsers() {
     try{
         console.log("Starting to create users...");
-        await prisma.user.create({
+        await prisma.users.create({
             data: {
                 username: 'albert', 
                 password: 'bertie99',
@@ -22,7 +22,7 @@ async function createInitialUsers() {
                 }
             }
         });
-        await prisma.user.create({ 
+        await prisma.users.create({ 
             data: {
                 username: 'sandra', 
                 password: '2sandy4me',
@@ -38,7 +38,7 @@ async function createInitialUsers() {
             }
             
           });
-          await prisma.user.create({ 
+          await prisma.users.create({ 
             data: {
                 username: 'glamgal',
                 password: 'soglam',
