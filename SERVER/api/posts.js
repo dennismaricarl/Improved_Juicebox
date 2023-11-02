@@ -82,6 +82,24 @@ postsRouter.patch('/:id', requireUser, async (req, res, next) => {
   }
 });
 
+//PUT request 
+postsRouter.put('/:id', requireUser, async (req, res, next) => {
+  const { title, content } = req.body;
+  try {
+    const post = await prisma.post.update({
+      where: {
+        id: Number(req.params.id)
+      },
+      data: {
+        title,
+        content
+      }
+    });
+    res.send(post);
+  }catch(error){
+    next(error)
+  }
+});
 
 
 //Delete a post 
