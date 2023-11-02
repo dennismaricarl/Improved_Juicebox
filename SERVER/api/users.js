@@ -26,6 +26,25 @@ router.get("/", async (req, res, next) => {
 router.post("/register", async (req, res, next) => {
   try {
     const { username, password, name, location } = req.body;
+
+    if (!username || !password) {
+        next({
+            name: "MissingCredentials",
+            message: "You must have a username and password"
+        })
+    }else  {
+        const maybeExistingUser = await prisma.users.findUnique({
+            where: {
+                username
+            }
+        })
+        
+        if(maybeExistingUser){
+            res.status(403).send("User already exists with that username");
+      
+        } 
+        
+    }
     const hashedPassword = await bcrypt.hash(password, SALT_COUNT);
     const user = await prisma.users.create({
       data: {
@@ -40,7 +59,7 @@ router.post("/register", async (req, res, next) => {
     delete user.password;
 
     //generate a token for new user
-    const token = jwt.sign({ id: user.id }, "hello");
+    const token = jwt.sign({ id: user.id }, JWT);
 
     res.status(201).send({
       username,
@@ -54,15 +73,18 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
+
+
+
 //Log in existing user
 router.post("/login", async (req, res, next) => {
   try {
-    // console.log(req.body, "hello");
     const { username, password } = req.body;
-    console.log(await prisma.users.findMany());
+ 
     const user = await prisma.users.findUnique({
       where: { username: username },
     });
+    
     console.log(user);
 
     //if user doesn't exist, send an error response
@@ -78,7 +100,7 @@ router.post("/login", async (req, res, next) => {
       res.status(401).send({ message: "Invalid password" });
     }
     //generate a JWT token for logged in user
-    const token = jwt.sign({ id: user.id }, "hello");
+    const token = jwt.sign({ id: user.id }, JWT);
 
     res.status(200).send({ user, token });
   } catch (error) {
