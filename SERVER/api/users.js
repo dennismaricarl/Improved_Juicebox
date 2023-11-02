@@ -15,7 +15,16 @@ const SALT_COUNT = 10;
 //Get users
 router.get("/", async (req, res, next) => {
   try {
-    const user = await prisma.users.findMany();
+    const user = await prisma.users.findMany({
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        location: true,
+        active: true
+      }
+    });
+    delete user.password 
     res.send(user);
   } catch (error) {
     next(error);
@@ -54,7 +63,6 @@ router.post("/register", async (req, res, next) => {
         location,
       },
     });
-    console.log(user, "hello");
 
     delete user.password;
 
